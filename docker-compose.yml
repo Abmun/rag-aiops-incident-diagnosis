@@ -123,6 +123,7 @@ services:
 
 volumes:
   faiss-data:
+  eval-results:
   redis-data:
   postgres-data:
   prometheus-data:
