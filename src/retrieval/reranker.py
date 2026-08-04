@@ -8,8 +8,8 @@ Replaces FAISS scores with cross-encoder scores on the top-k candidates.
 
 from __future__ import annotations
 
-import structlog
 import numpy as np
+import structlog
 
 from src.indexing.vector_store import SearchResult
 

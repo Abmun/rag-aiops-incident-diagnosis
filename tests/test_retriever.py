@@ -7,8 +7,6 @@ Uses mock embeddings to avoid requiring API keys during testing.
 
 from __future__ import annotations
 
-import tempfile
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -17,7 +15,6 @@ import pytest
 from src.indexing.chunker import DocumentChunk
 from src.indexing.vector_store import FAISSVectorStore, SearchResult
 from src.ingestion.base import DocumentType
-
 
 # ── Helpers ──────────────────────────────────────────────────────
 
@@ -105,7 +102,6 @@ class TestFAISSVectorStore:
         # Add initial chunks
         pairs = [(make_chunk(f"c{i}", f"text {i}"), random_embedding(self.DIMS)) for i in range(5)]
         store.add_chunks(pairs)
-        initial_count = store.total_vectors
 
         # Rebuild with new chunks
         new_pairs = [(make_chunk(f"new{i}", f"new text {i}"), random_embedding(self.DIMS)) for i in range(3)]

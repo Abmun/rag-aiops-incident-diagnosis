@@ -4,7 +4,7 @@ src/api/models.py
 Pydantic request/response models for the FastAPI layer.
 """
 from __future__ import annotations
-from typing import Any
+
 from pydantic import BaseModel, Field
 
 

@@ -23,11 +23,6 @@ x-aiops-env: &aiops-env
   LOCAL_EMBEDDING_MODEL:  ${LOCAL_EMBEDDING_MODEL:-sentence-transformers/all-mpnet-base-v2}
   REDIS_HOST:             redis
   REDIS_PORT:             6379
-  POSTGRES_HOST:          postgres
-  POSTGRES_PORT:          5432
-  POSTGRES_USER:          aiops
-  POSTGRES_PASSWORD:      aiops
-  POSTGRES_DB:            aiops_db
   API_PORT:               8000
   API_WORKERS:            2
   LOG_LEVEL:              ${LOG_LEVEL:-INFO}
@@ -50,8 +45,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c",
@@ -71,24 +64,6 @@ services:
       - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: aiops-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER:     aiops
-      POSTGRES_PASSWORD: aiops
-      POSTGRES_DB:       aiops_db
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aiops -d aiops_db"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -125,6 +100,5 @@ volumes:
   faiss-data:
   eval-results:
   redis-data:
-  postgres-data:
   prometheus-data:
   grafana-data:

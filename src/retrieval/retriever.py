@@ -15,8 +15,8 @@ import structlog
 
 from src.indexing.embedder import Embedder
 from src.indexing.vector_store import FAISSVectorStore, SearchResult
-from src.retrieval.reranker import CrossEncoderReranker
 from src.retrieval.query_expander import HyDEQueryExpander
+from src.retrieval.reranker import CrossEncoderReranker
 
 logger = structlog.get_logger(__name__)
 

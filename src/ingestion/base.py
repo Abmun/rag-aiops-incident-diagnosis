@@ -9,7 +9,6 @@ OperationalDocument schema used throughout the pipeline.
 from __future__ import annotations
 
 import hashlib
-import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -146,13 +145,28 @@ class BaseIngester(ABC):
 
     @staticmethod
     def _clean_text(text: str) -> str:
-        """Basic text cleaning shared across ingesters."""
+        """
+        Basic text cleaning shared across ingesters.
+
+        Normalises stray whitespace while preserving line and paragraph
+        structure — downstream, `SemanticChunker` splits on Markdown
+        headings and blank lines, and `_extract_title` matches heading
+        lines with `re.MULTILINE`. Collapsing all whitespace (including
+        newlines) to single spaces, as an earlier version of this method
+        did, silently destroyed that structure: every document became a
+        single line, so heading/section detection only ever matched (at
+        most) the very first line and swallowed the rest of the document
+        into its capture group.
+        """
         import re
-        # Remove excessive whitespace
-        text = re.sub(r"\s+", " ", text)
         # Remove null bytes
         text = text.replace("\x00", "")
-        # Strip leading/trailing whitespace
+        # Collapse runs of horizontal whitespace (spaces/tabs), not newlines
+        text = re.sub(r"[ \t]+", " ", text)
+        # Trim trailing whitespace on each line
+        text = "\n".join(line.rstrip() for line in text.split("\n"))
+        # Collapse 3+ consecutive blank lines down to a single paragraph break
+        text = re.sub(r"\n{3,}", "\n\n", text)
         return text.strip()
 
     @staticmethod

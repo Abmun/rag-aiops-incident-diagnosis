@@ -15,10 +15,9 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Runtime deps: libgomp (FAISS), postgresql-client (pg_isready), redis-tools
+# Runtime deps: libgomp (FAISS), redis-tools (redis-cli health check)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    postgresql-client \
     redis-tools \
     && rm -rf /var/lib/apt/lists/*
 

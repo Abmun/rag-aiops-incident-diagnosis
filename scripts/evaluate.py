@@ -19,7 +19,6 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import yaml
 from rich.console import Console
@@ -218,13 +217,13 @@ def main():
         config["embedding"]["provider"] = "local"
 
     # Import and build components
-    from src.indexing.embedder import Embedder
-    from src.indexing.vector_store import FAISSVectorStore
-    from src.retrieval.reranker import CrossEncoderReranker
-    from src.retrieval.retriever import SemanticRetriever
-    from src.retrieval.query_expander import HyDEQueryExpander
     from src.diagnosis.diagnoser import IncidentDiagnoser
     from src.diagnosis.llm_client import LLMClient
+    from src.indexing.embedder import Embedder
+    from src.indexing.vector_store import FAISSVectorStore
+    from src.retrieval.query_expander import HyDEQueryExpander
+    from src.retrieval.reranker import CrossEncoderReranker
+    from src.retrieval.retriever import SemanticRetriever
 
     embedder = Embedder({**config["embedding"], **config["llm"], "cache": config.get("cache", {})})
     vector_store = FAISSVectorStore({**config["vector_store"], "dimensions": embedder.dimensions})

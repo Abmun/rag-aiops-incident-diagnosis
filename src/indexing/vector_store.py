@@ -8,14 +8,12 @@ Supports hybrid retrieval: dense ANN + structured metadata filters.
 
 from __future__ import annotations
 
-import json
 import os
 import pickle
 import shutil
 import threading
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import faiss
 import numpy as np
@@ -209,13 +207,19 @@ class FAISSVectorStore:
             scores, indices = self._index.search(query, fetch_k)
 
         results = []
-        for score, idx in zip(scores[0], indices[0]):
+        for raw_score, idx in zip(scores[0], indices[0]):
             if idx < 0 or idx >= len(self._chunks):
                 continue
             chunk = self._chunks[idx]
             if filters and not self._matches_filters(chunk, filters):
                 continue
-            results.append(SearchResult(chunk=chunk, score=float(score), rank=len(results) + 1))
+            # `raw_score` is the FAISS inner product on L2-normalised
+            # vectors, i.e. raw cosine similarity in [-1, 1]. Rescale to
+            # [0, 1] so SearchResult.score honours its documented contract
+            # (callers, e.g. the reranker's threshold filter and the
+            # confidence display, assume a [0, 1] relevance score).
+            score = max(0.0, min(1.0, (float(raw_score) + 1.0) / 2.0))
+            results.append(SearchResult(chunk=chunk, score=score, rank=len(results) + 1))
             if len(results) >= top_k:
                 break
 

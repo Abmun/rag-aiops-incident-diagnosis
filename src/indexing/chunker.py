@@ -14,15 +14,42 @@ import re
 from dataclasses import dataclass, field
 from typing import Protocol
 
-import tiktoken
 import structlog
+import tiktoken
 
 from src.ingestion.base import DocumentType, OperationalDocument
 
 logger = structlog.get_logger(__name__)
 
-# Tokeniser used for chunk size measurement (same model as ada-002)
-_TOKENISER = tiktoken.get_encoding("cl100k_base")
+# Tokeniser used for chunk size measurement (same model as ada-002).
+# Loaded lazily (see `_get_tokeniser`) rather than at import time.
+_TOKENISER: "tiktoken.Encoding | None" = None
+
+
+def _get_tokeniser() -> "tiktoken.Encoding":
+    """Lazily load and cache the tiktoken encoding.
+
+    tiktoken downloads its BPE merge file from a remote CDN the first time
+    an encoding is requested, then caches it locally (respects
+    TIKTOKEN_CACHE_DIR). Loading it at import time meant simply importing
+    this module — even for code paths that never chunk text — required
+    network access and failed hard in offline/sandboxed environments. Now
+    the encoding is only fetched the first time it's actually needed.
+    """
+    global _TOKENISER
+    if _TOKENISER is None:
+        try:
+            _TOKENISER = tiktoken.get_encoding("cl100k_base")
+        except Exception as exc:
+            raise RuntimeError(
+                "Failed to load the tiktoken 'cl100k_base' encoding, which "
+                "requires network access on first use (the result is then "
+                "cached locally). If you're running offline, pre-warm the "
+                "cache on a machine with internet access, or set "
+                "TIKTOKEN_CACHE_DIR to a directory containing the cached "
+                "encoding."
+            ) from exc
+    return _TOKENISER
 
 
 @dataclass
@@ -59,7 +86,9 @@ class ChunkingStrategy(Protocol):
 
 
 def _count_tokens(text: str) -> int:
-    return len(_TOKENISER.encode(text))
+    if not text:
+        return 0
+    return len(_get_tokeniser().encode(text))
 
 
 def _make_chunk_id(document_id: str, index: int) -> str:
@@ -77,7 +106,8 @@ class SlidingWindowChunker:
         self.overlap = overlap
 
     def chunk(self, document: OperationalDocument) -> list[DocumentChunk]:
-        tokens = _TOKENISER.encode(document.content_text)
+        tokeniser = _get_tokeniser()
+        tokens = tokeniser.encode(document.content_text)
         if not tokens:
             return []
 
@@ -86,7 +116,7 @@ class SlidingWindowChunker:
         while start < len(tokens):
             end = min(start + self.chunk_size, len(tokens))
             chunk_tokens = tokens[start:end]
-            chunk_text = _TOKENISER.decode(chunk_tokens)
+            chunk_text = tokeniser.decode(chunk_tokens)
 
             chunks.append(chunk_text)
             if end == len(tokens):
@@ -124,45 +154,81 @@ class SlidingWindowChunker:
 
 class SemanticChunker:
     """
-    Section/paragraph-aware chunking using Markdown headings and
-    blank-line paragraph boundaries as natural split points.
+    Section-aware chunking that treats Markdown headings as hard semantic
+    boundaries: content under different top-level headings is never merged
+    into the same chunk, so retrieval doesn't blend unrelated sections of
+    an incident ticket or post-mortem together.
+
+    Within a single heading-delimited section, paragraphs are packed
+    together up to `max_chunk_size`, and any section too large to fit in
+    one chunk is split with a sliding window. `min_chunk_size` only
+    controls folding an undersized trailing paragraph fragment into its
+    neighbour *within* a section — it never merges across a heading
+    boundary and never drops content.
+
     Best for incident tickets and post-mortems.
     """
 
-    # Split on double newlines or Markdown headings
-    SPLIT_PATTERN = re.compile(r"\n{2,}|(?=^#{1,3}\s)", re.MULTILINE)
+    # Hard boundary: split immediately before a Markdown heading.
+    HEADING_PATTERN = re.compile(r"(?=^#{1,3}\s)", re.MULTILINE)
+    # Soft boundary used only when splitting an oversized section.
+    PARAGRAPH_PATTERN = re.compile(r"\n{2,}")
 
     def __init__(self, max_chunk_size: int = 512, min_chunk_size: int = 50):
         self.max_chunk_size = max_chunk_size
         self.min_chunk_size = min_chunk_size
 
     def chunk(self, document: OperationalDocument) -> list[DocumentChunk]:
-        # Split on semantic boundaries
-        sections = self.SPLIT_PATTERN.split(document.content_text)
+        sections = self.HEADING_PATTERN.split(document.content_text)
         sections = [s.strip() for s in sections if s.strip()]
+        if not sections:
+            return []
 
-        # Merge small sections, split large ones
-        merged = self._merge_and_split(sections)
+        pieces: list[str] = []
+        for section in sections:
+            pieces.extend(self._split_section(section))
 
-        return SlidingWindowChunker._to_chunk_objects(document, merged)
+        return SlidingWindowChunker._to_chunk_objects(document, pieces)
+
+    def _split_section(self, section: str) -> list[str]:
+        """Return one chunk for `section`, or several if it's oversized."""
+        if _count_tokens(section) <= self.max_chunk_size:
+            return [section]
+
+        paragraphs = [
+            p.strip() for p in self.PARAGRAPH_PATTERN.split(section) if p.strip()
+        ]
+        packed = self._merge_and_split(paragraphs)
+
+        # Fold an undersized trailing fragment into the previous chunk
+        # instead of emitting a near-empty final chunk.
+        if len(packed) > 1 and _count_tokens(packed[-1]) < self.min_chunk_size:
+            candidate = f"{packed[-2]}\n\n{packed[-1]}"
+            if _count_tokens(candidate) <= self.max_chunk_size:
+                packed[-2:] = [candidate]
+
+        return packed
 
     def _merge_and_split(self, sections: list[str]) -> list[str]:
-        result = []
+        """Greedily pack `sections` up to max_chunk_size, splitting any
+        individually-oversized section with a sliding window. Never drops
+        content (unlike the packing loop's earlier revision, which
+        silently discarded any trailing fragment under min_chunk_size)."""
+        result: list[str] = []
         buffer = ""
 
         for section in sections:
             section_tokens = _count_tokens(section)
 
             if section_tokens > self.max_chunk_size:
-                # Flush buffer first
                 if buffer:
                     result.append(buffer.strip())
                     buffer = ""
-                # Split oversized section with sliding window
-                sub_chunks = SlidingWindowChunker(
-                    chunk_size=self.max_chunk_size, overlap=30
-                )._chunk_text(section)
-                result.extend(sub_chunks)
+                result.extend(
+                    SlidingWindowChunker(
+                        chunk_size=self.max_chunk_size, overlap=30
+                    )._chunk_text(section)
+                )
                 continue
 
             candidate = f"{buffer}\n\n{section}".strip() if buffer else section
@@ -176,17 +242,18 @@ class SemanticChunker:
         if buffer:
             result.append(buffer.strip())
 
-        return [s for s in result if _count_tokens(s) >= self.min_chunk_size]
+        return result
 
 
 # Patch SlidingWindowChunker to expose _chunk_text for internal use
 def _sliding_chunk_text(self, text: str) -> list[str]:
-    tokens = _TOKENISER.encode(text)
+    tokeniser = _get_tokeniser()
+    tokens = tokeniser.encode(text)
     chunks = []
     start = 0
     while start < len(tokens):
         end = min(start + self.chunk_size, len(tokens))
-        chunks.append(_TOKENISER.decode(tokens[start:end]))
+        chunks.append(tokeniser.decode(tokens[start:end]))
         if end == len(tokens):
             break
         start += self.chunk_size - self.overlap

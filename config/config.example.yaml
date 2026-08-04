@@ -77,14 +77,6 @@ cache:
   ttl_seconds: 3600
   max_memory: "256mb"
 
-# ── Database (Metadata Store) ──────────────────────────────────
-database:
-  url: "postgresql://aiops:aiops@localhost:5432/aiops_db"
-  # For dev/testing, use SQLite:
-  # url: "sqlite:///data/aiops_metadata.db"
-  pool_size: 10
-  max_overflow: 20
-
 # ── Ingestion Sources ──────────────────────────────────────────
 ingestion:
   servicenow:

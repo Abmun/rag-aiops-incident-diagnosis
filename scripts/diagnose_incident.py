@@ -20,8 +20,6 @@ from pathlib import Path
 import yaml
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
-from rich import box
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -112,13 +110,13 @@ def main():
     if args.local_embeddings:
         config["embedding"]["provider"] = "local"
 
+    from src.diagnosis.diagnoser import IncidentContext, IncidentDiagnoser
+    from src.diagnosis.llm_client import LLMClient
     from src.indexing.embedder import Embedder
     from src.indexing.vector_store import FAISSVectorStore
+    from src.retrieval.query_expander import HyDEQueryExpander
     from src.retrieval.reranker import CrossEncoderReranker
     from src.retrieval.retriever import SemanticRetriever
-    from src.retrieval.query_expander import HyDEQueryExpander
-    from src.diagnosis.diagnoser import IncidentDiagnoser, IncidentContext
-    from src.diagnosis.llm_client import LLMClient
 
     with console.status("[bold green]Initialising RAG pipeline..."):
         embedder = Embedder({**config["embedding"], **config["llm"], "cache": config.get("cache", {})})

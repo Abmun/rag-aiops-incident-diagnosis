@@ -274,7 +274,7 @@ tests/test_diagnoser.py::TestIncidentDiagnoser::test_diagnose_parses_root_causes
 
 ## Step 8 — Full Docker Stack (Optional)
 
-Starts API + Redis + PostgreSQL + Prometheus + Grafana in one command.
+Starts API + Redis + Prometheus + Grafana in one command.
 
 ```bash
 docker-compose up --build

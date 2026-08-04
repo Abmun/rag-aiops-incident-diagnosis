@@ -7,8 +7,7 @@ All LLM and retrieval calls are mocked for deterministic testing.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -16,14 +15,11 @@ from src.diagnosis.diagnoser import (
     DiagnosisResult,
     IncidentContext,
     IncidentDiagnoser,
-    RelatedDoc,
-    RootCause,
     _build_user_message,
 )
 from src.indexing.chunker import DocumentChunk
 from src.indexing.vector_store import SearchResult
 from src.ingestion.base import DocumentType
-
 
 # ── Fixtures ─────────────────────────────────────────────────────
 
@@ -221,7 +217,7 @@ class TestIncidentDiagnoser:
         incident = IncidentContext("TEST-001", "Payment 503", "HikariPool errors")
         result = diagnoser.diagnose(incident)
         d = result.to_dict()
-        json_str = json.dumps(d)  # should not raise
+        json.dumps(d)  # should not raise
         assert "incident_id" in d
         assert "root_causes" in d
 

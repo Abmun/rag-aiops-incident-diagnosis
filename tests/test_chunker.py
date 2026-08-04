@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
-
 from src.indexing.chunker import (
     DocumentChunker,
     SemanticChunker,
@@ -18,7 +16,6 @@ from src.indexing.chunker import (
     _count_tokens,
 )
 from src.ingestion.base import DocumentType, OperationalDocument
-
 
 # ── Fixtures ─────────────────────────────────────────────────────
 

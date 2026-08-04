@@ -20,16 +20,22 @@ from pathlib import Path
 
 import yaml
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from rich.table import Table
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.ingestion.ticket_ingester import LocalTicketIngester
-from src.ingestion.runbook_ingester import LocalRunbookIngester
 from src.indexing.chunker import DocumentChunker
 from src.indexing.embedder import Embedder
 from src.indexing.vector_store import FAISSVectorStore
+from src.ingestion.runbook_ingester import LocalRunbookIngester
+from src.ingestion.ticket_ingester import LocalTicketIngester
 
 console = Console()
 

@@ -21,13 +21,6 @@ until redis-cli -h "${REDIS_HOST:-redis}" -p "${REDIS_PORT:-6379}" ping > /dev/n
 done
 echo "✓  Redis ready"
 
-# ── Wait for Postgres ───────────────────────────────────────────
-echo "⏳ Waiting for PostgreSQL..."
-until pg_isready -h "${POSTGRES_HOST:-postgres}" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-aiops}" > /dev/null 2>&1; do
-  sleep 1
-done
-echo "✓  PostgreSQL ready"
-
 # ── Generate config.yaml from environment ──────────────────────
 echo "⚙️  Generating config from environment variables..."
 python /app/scripts/generate_config.py

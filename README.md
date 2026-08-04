@@ -1,5 +1,8 @@
 # RAG-Based AIOps Framework for Automated Incident Diagnosis
 
+[![CI](https://github.com/Abmun/rag-aiops-incident-diagnosis/actions/workflows/ci.yml/badge.svg)](https://github.com/Abmun/rag-aiops-incident-diagnosis/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > **Reference implementation for:**
 > *"Retrieval-Augmented Generation for Automated Incident Diagnosis in Cloud-Native DevOps Environments"*
 > Abhimanyu Garg, Rajendranath Rengan — Journal of Software: Evolution and Process, Springer
@@ -90,21 +93,21 @@ docker-compose up --build
 
 Services started:
 - `aiops-api` — FastAPI service on port 8000
-- `faiss-server` — Vector index server on port 8001  
 - `redis` — Query embedding cache on port 6379
+- `prometheus` — Metrics on port 9090
+- `grafana` — Dashboards on port 3000 (admin / admin)
 
 ---
 
 ## Project Structure
 
 ```
-aiops-rag/
+rag-aiops-incident-diagnosis/
 ├── src/
 │   ├── ingestion/          # Data source connectors
-│   │   ├── base.py         # Abstract ingestion interface
-│   │   ├── ticket_ingester.py
-│   │   ├── runbook_ingester.py
-│   │   └── alert_ingester.py
+│   │   ├── base.py         # OperationalDocument schema + BaseIngester
+│   │   ├── ticket_ingester.py   # Local JSON/CSV + ServiceNow
+│   │   └── runbook_ingester.py  # Local Markdown + Confluence
 │   ├── indexing/           # Knowledge indexing pipeline
 │   │   ├── chunker.py      # Document chunking strategies
 │   │   ├── embedder.py     # Embedding generation
@@ -114,13 +117,11 @@ aiops-rag/
 │   │   ├── reranker.py     # Cross-encoder re-ranking
 │   │   └── query_expander.py # HyDE query expansion
 │   ├── diagnosis/          # LLM reasoning module
-│   │   ├── context_builder.py
 │   │   ├── llm_client.py
 │   │   └── diagnoser.py
 │   └── api/                # FastAPI REST interface
 │       ├── main.py
-│       ├── models.py
-│       └── routes.py
+│       └── models.py
 ├── config/
 │   ├── config.example.yaml
 │   └── config.yaml         # (gitignored — contains secrets)
@@ -129,7 +130,8 @@ aiops-rag/
 ├── scripts/
 │   ├── index_knowledge_base.py
 │   ├── diagnose_incident.py
-│   └── evaluate.py
+│   ├── evaluate.py
+│   └── generate_config.py
 ├── tests/
 │   ├── test_chunker.py
 │   ├── test_retriever.py
@@ -155,6 +157,14 @@ If you use this code in your research, please cite:
   year      = {2025}
 }
 ```
+
+---
+
+## Contributing
+
+Contributions are welcome — bug fixes, tests, docs, and new ingestion connectors alike.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and PR guidelines, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
 
 ---
 

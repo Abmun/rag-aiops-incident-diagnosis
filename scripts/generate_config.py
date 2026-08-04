@@ -18,11 +18,6 @@ Environment variables (all optional — sensible defaults provided):
   Infrastructure:
     REDIS_HOST              default: redis
     REDIS_PORT              default: 6379
-    POSTGRES_HOST           default: postgres
-    POSTGRES_PORT           default: 5432
-    POSTGRES_USER           default: aiops
-    POSTGRES_PASSWORD       default: aiops
-    POSTGRES_DB             default: aiops_db
 
   App:
     API_PORT                default: 8000
@@ -31,7 +26,6 @@ Environment variables (all optional — sensible defaults provided):
 """
 
 import os
-import sys
 from pathlib import Path
 
 import yaml
@@ -124,19 +118,6 @@ def build_config() -> dict:
             "max_memory": "256mb",
         },
 
-        "database": {
-            "url": (
-                f"postgresql://"
-                f"{env('POSTGRES_USER', 'aiops')}:"
-                f"{env('POSTGRES_PASSWORD', 'aiops')}@"
-                f"{env('POSTGRES_HOST', 'postgres')}:"
-                f"{env('POSTGRES_PORT', '5432')}/"
-                f"{env('POSTGRES_DB', 'aiops_db')}"
-            ),
-            "pool_size": 10,
-            "max_overflow": 20,
-        },
-
         "ingestion": {
             "local_files": {
                 "enabled": True,
@@ -179,7 +160,6 @@ def main():
     print(f"  Embedding provider:  {config['embedding']['provider']}")
     print(f"  Embedding dims:      {config['embedding']['dimensions']}")
     print(f"  Redis:               {config['cache']['host']}:{config['cache']['port']}")
-    print(f"  Database:            {config['database']['url'].split('@')[-1]}")
 
 
 if __name__ == "__main__":

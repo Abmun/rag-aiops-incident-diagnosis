@@ -13,26 +13,25 @@ from contextlib import asynccontextmanager
 
 import structlog
 import yaml
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
-from starlette.requests import Request
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from starlette.responses import Response
 
 from src.api.models import (
-    DiagnoseRequest, DiagnoseResponse,
-    IndexRequest, IndexResponse,
-    HealthResponse, StatsResponse,
+    DiagnoseRequest,
+    DiagnoseResponse,
+    HealthResponse,
+    StatsResponse,
 )
-from src.api.routes import create_router
-from src.diagnosis.diagnoser import IncidentDiagnoser, IncidentContext
+from src.diagnosis.diagnoser import IncidentContext, IncidentDiagnoser
 from src.diagnosis.llm_client import LLMClient
 from src.indexing.chunker import DocumentChunker
 from src.indexing.embedder import Embedder
 from src.indexing.vector_store import FAISSVectorStore
+from src.retrieval.query_expander import HyDEQueryExpander
 from src.retrieval.reranker import CrossEncoderReranker
 from src.retrieval.retriever import SemanticRetriever
-from src.retrieval.query_expander import HyDEQueryExpander
 
 logger = structlog.get_logger(__name__)
 
