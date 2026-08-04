@@ -1,9 +1,5 @@
 # Running the PoC — RAG-AIOps Incident Diagnosis
 
-> **Reference implementation for:**
-> *"Retrieval-Augmented Generation for Automated Incident Diagnosis in Cloud-Native DevOps Environments"*
-> Abhimanyu Garg, Rajendranath Rengan — Journal of Software: Evolution and Process, Springer
-
 ---
 
 ## Prerequisites
@@ -163,7 +159,7 @@ Retrieved 5 knowledge base chunks | Latency: 2847ms
 
 ---
 
-## Step 5 — Run Evaluation (Reproduce Paper Results)
+## Step 5 — Run Evaluation
 
 ```bash
 python scripts/evaluate.py \
@@ -198,9 +194,9 @@ Loaded 8 evaluation samples
 Results saved to data/eval_results/results.json
 ```
 
-> **Note:** The sample dataset has 8 incidents. The paper reports results over 2,400
-> annotated scenarios. To replicate paper-scale results, populate `data/samples/incidents/`
-> with your own incident dataset following the schema in
+> **Note:** The sample dataset has 8 incidents, meant to demonstrate the evaluation
+> harness end-to-end. For meaningful metrics at scale, populate
+> `data/samples/incidents/` with your own incident dataset following the schema in
 > `data/samples/incidents/sample_incidents.json`.
 
 ---
@@ -308,7 +304,7 @@ docker-compose down -v
 | Re-index from scratch         | `python scripts/index_knowledge_base.py --rebuild`              |
 | Diagnose from file            | `python scripts/diagnose_incident.py --incident <file>`         |
 | Diagnose from CLI args        | `python scripts/diagnose_incident.py --title "..." --description "..."` |
-| Reproduce paper metrics       | `python scripts/evaluate.py --dataset data/samples/eval_dataset.json` |
+| Run evaluation                | `python scripts/evaluate.py --dataset data/samples/eval_dataset.json` |
 | Run ablation study            | `python scripts/evaluate.py --ablation`                         |
 | Start REST API                | `uvicorn src.api.main:app --reload --port 8000`                 |
 | Run unit tests                | `pytest tests/ -v`                                              |
@@ -375,23 +371,6 @@ rag-aiops-incident-diagnosis/
 | `No documents found` | Check `--data-dir` points to a directory containing `.json` or `.md` files |
 | Empty retrieval results | Run `index_knowledge_base.py` first before diagnosing |
 | Docker port conflict | Change port mapping in `docker-compose.yml` (e.g. `"8001:8000"`) |
-
----
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@article{garg2025ragaiops,
-  title     = {Retrieval-Augmented Generation for Automated Incident Diagnosis
-               in Cloud-Native DevOps Environments},
-  author    = {Garg, Abhimanyu and Rengan, Rajendranath},
-  journal   = {Journal of Software: Evolution and Process},
-  publisher = {Springer},
-  year      = {2025}
-}
-```
 
 ---
 

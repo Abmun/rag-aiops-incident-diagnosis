@@ -117,12 +117,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="RAG-AIOps Incident Diagnosis API",
-    description=(
-        "REST API for the RAG-based AIOps framework described in:\n"
-        "*Retrieval-Augmented Generation for Automated Incident Diagnosis "
-        "in Cloud-Native DevOps Environments*\n"
-        "Garg & Rengan, Journal of Software: Evolution and Process, Springer"
-    ),
+    description="REST API for the RAG-based AIOps incident diagnosis framework.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -143,7 +138,7 @@ async def diagnose_incident(request: DiagnoseRequest):
     **Primary endpoint** — Run the full RAG diagnosis pipeline on an incident.
 
     Returns structured root cause analysis, remediation steps, and
-    confidence score. Corresponds to the 8-step workflow in the paper.
+    confidence score.
     """
     start = time.perf_counter()
     try:

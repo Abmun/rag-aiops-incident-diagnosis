@@ -1,8 +1,7 @@
 # Contributing
 
-Thanks for your interest in improving this project. It's the reference implementation
-accompanying a published paper, so correctness and clarity matter more than raw feature
-count — small, well-tested changes are very welcome.
+Thanks for your interest in improving this project. Correctness and clarity matter more
+than raw feature count — small, well-tested changes are very welcome.
 
 ## Getting started
 
@@ -41,8 +40,8 @@ Both run in CI on every PR; please make sure they pass locally first.
 - Match the existing style: type hints, `structlog` for logging, dataclasses for
   structured data. `ruff check` enforces import ordering and catches unused imports.
 - If you change the chunking, retrieval, or diagnosis pipeline, please explain the
-  reasoning in the PR description — these correspond directly to sections of the paper,
-  so behavioral changes are worth documenting clearly.
+  reasoning in the PR description — these are core to the system's behavior, so changes
+  are worth documenting clearly.
 
 ## Reporting bugs / requesting features
 

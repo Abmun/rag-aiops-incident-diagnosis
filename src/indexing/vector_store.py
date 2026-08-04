@@ -2,7 +2,7 @@
 src/indexing/vector_store.py
 ─────────────────────────────
 FAISS-based vector store with HNSW index.
-Implements the blue-green atomic index swap described in the paper (Section 4.4).
+Implements a blue-green atomic index swap for zero-downtime re-indexing.
 Supports hybrid retrieval: dense ANN + structured metadata filters.
 """
 
@@ -47,7 +47,7 @@ class FAISSVectorStore:
     """
     FAISS HNSW vector store for semantic similarity search.
 
-    Index configuration (from paper, Section 4.4):
+    Index configuration:
       - Index type: HNSW (Hierarchical Navigable Small World)
       - M = 32 neighbours per node
       - ef_construction = 400
@@ -80,7 +80,7 @@ class FAISSVectorStore:
     # ── Index Construction ─────────────────────────────────────
 
     def _build_empty_index(self) -> None:
-        """Create a fresh HNSW index configured as per the paper."""
+        """Create a fresh HNSW index with the configured parameters."""
         # HNSW index using Inner Product (for cosine after L2 normalisation)
         index = faiss.IndexHNSWFlat(self.dimensions, self.hnsw_m, faiss.METRIC_INNER_PRODUCT)
         index.hnsw.efConstruction = self.hnsw_ef_construction

@@ -4,7 +4,6 @@ set -e
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
 echo "║       RAG-AIOps Incident Diagnosis Framework             ║"
-echo "║       Garg & Rengan — Springer JSEP 2025                 ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
 

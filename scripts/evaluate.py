@@ -2,7 +2,7 @@
 """
 scripts/evaluate.py
 ────────────────────
-Evaluation harness to reproduce the paper's experimental results.
+Evaluation harness for the RAG-AIOps diagnosis pipeline.
 Computes: Accuracy, Precision@1, Recall@3, Mean Diagnosis Time (MDT).
 Also runs the ablation study by disabling components one at a time.
 
@@ -151,7 +151,6 @@ def evaluate_system(
 def run_ablation_study(diagnoser_factory, samples: list[EvalSample]) -> list[EvalMetrics]:
     """
     Ablation study: disable one component at a time.
-    Reproduces Fig. 5 (left) from the paper.
     """
     ablation_configs = [
         ("Full System", {}),
@@ -246,7 +245,6 @@ def main():
         full_metrics = evaluate_system(diagnoser, samples, "Full System")
         all_metrics.append(full_metrics)
         console.print("\n[dim]Note: Full ablation requires component-level config overrides.[/dim]")
-        console.print("[dim]See paper Section 6.5 for complete ablation methodology.[/dim]")
     else:
         metrics = evaluate_system(diagnoser, samples)
         all_metrics.append(metrics)

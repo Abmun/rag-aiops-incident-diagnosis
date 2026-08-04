@@ -3,21 +3,18 @@
 [![CI](https://github.com/Abmun/rag-aiops-incident-diagnosis/actions/workflows/ci.yml/badge.svg)](https://github.com/Abmun/rag-aiops-incident-diagnosis/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Reference implementation for:**
-> *"Retrieval-Augmented Generation for Automated Incident Diagnosis in Cloud-Native DevOps Environments"*
-> Abhimanyu Garg, Rajendranath Rengan — Journal of Software: Evolution and Process, Springer
-
 ---
 
 ## Overview
 
-This repository contains the full Proof-of-Concept (PoC) implementation of the RAG-based AIOps framework described in the paper. It demonstrates:
+This repository contains a Proof-of-Concept (PoC) implementation of a RAG-based AIOps
+framework for automated incident diagnosis. It demonstrates:
 
 - **5-layer architecture**: Data Sources → Ingestion → Indexing → Retrieval → LLM Reasoning
 - **Knowledge indexing pipeline**: Chunking, embedding generation, FAISS vector indexing
 - **Real-time incident diagnosis**: Semantic retrieval + LLM-generated root cause analysis
 - **REST API**: FastAPI-based service for integration with incident management tools
-- **Evaluation harness**: Reproduce paper metrics (accuracy, MTTD reduction, ablation study)
+- **Evaluation harness**: Accuracy, precision/recall, and ablation-study metrics
 
 ---
 
@@ -77,7 +74,7 @@ uvicorn src.api.main:app --reload --port 8000
 # API docs: http://localhost:8000/docs
 ```
 
-### 6. Run evaluation (reproduce paper results)
+### 6. Run evaluation
 
 ```bash
 python scripts/evaluate.py --dataset data/samples/eval_dataset.json
@@ -139,23 +136,6 @@ rag-aiops-incident-diagnosis/
 ├── Dockerfile
 ├── docker-compose.yml
 └── requirements.txt
-```
-
----
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@article{garg2025ragaiops,
-  title     = {Retrieval-Augmented Generation for Automated Incident Diagnosis
-               in Cloud-Native DevOps Environments},
-  author    = {Garg, Abhimanyu and Rengan, Rajendranath},
-  journal   = {Journal of Software: Evolution and Process},
-  publisher = {Springer},
-  year      = {2025}
-}
 ```
 
 ---

@@ -2,7 +2,7 @@
 src/indexing/chunker.py
 ────────────────────────
 Document chunking strategies for the knowledge indexing pipeline.
-Three strategies as described in the paper (Section 4.3):
+Three strategies:
   1. SlidingWindowChunker  — fixed window with overlap (runbooks, docs)
   2. SemanticChunker       — section/paragraph-aware (tickets, post-mortems)
   3. SentenceChunker       — sentence-level (alerts, short-form notes)
@@ -301,7 +301,7 @@ class SentenceChunker:
 class DocumentChunker:
     """
     Main chunker that dispatches to the appropriate strategy
-    based on document type, as described in the paper (Table config).
+    based on document type.
     """
 
     STRATEGY_MAP: dict[DocumentType, type] = {

@@ -5,8 +5,6 @@ Semantic retrieval engine combining:
   1. FAISS ANN search (dense retrieval)
   2. Cross-encoder re-ranking (ms-marco-MiniLM)
   3. HyDE query expansion (when initial results are sparse)
-
-Corresponds to Section 5.3 of the paper.
 """
 
 from __future__ import annotations
@@ -23,7 +21,7 @@ logger = structlog.get_logger(__name__)
 
 class SemanticRetriever:
     """
-    Main retrieval engine as described in the paper.
+    Main retrieval engine.
 
     Pipeline per query:
       1. Embed query → query vector

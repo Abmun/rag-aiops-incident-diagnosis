@@ -2,7 +2,7 @@
 src/diagnosis/diagnoser.py
 ───────────────────────────
 Core incident diagnosis orchestrator.
-Implements the full 8-step workflow described in the paper (Section 5):
+Implements the full 8-step diagnosis workflow:
   1. Error context extraction
   2. Query formulation
   3. Query embedding
@@ -160,7 +160,6 @@ class RelatedDoc:
 class DiagnosisResult:
     """
     Structured output from the RAG diagnosis pipeline.
-    Corresponds to the 'Step 8: Output to Engineer' in Figure 3.
     """
     incident_id: str
     root_causes: list[RootCause]
@@ -208,7 +207,7 @@ class DiagnosisResult:
 
 class IncidentDiagnoser:
     """
-    Orchestrates the full incident diagnosis pipeline (Sections 5.1–5.5).
+    Orchestrates the full incident diagnosis pipeline.
     """
 
     def __init__(
