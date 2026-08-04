@@ -64,7 +64,7 @@ python scripts/index_knowledge_base.py --data-dir data/samples
 ### 4. Run diagnosis on a sample incident
 
 ```bash
-python scripts/diagnose_incident.py --incident data/samples/incidents/sample_incident.json
+python scripts/diagnose_incident.py --incident data/samples/incidents/sample_incidents.json
 ```
 
 ### 5. Start the REST API
